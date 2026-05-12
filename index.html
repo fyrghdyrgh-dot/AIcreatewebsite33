@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI产品经理工作台｜原型/流程图·竞品拆解·PRD清单</title>
+  <meta name="description" content="AI 产品经理工作台：侧栏分类+工作台卡片，覆盖原型/流程图、竞品拆解、PRD 模板与评审清单。支持搜索、收藏、最近使用与模板库；纯前端单页可直接部署。" />
+  <meta property="og:title" content="AI产品经理工作台" />
+  <meta property="og:description" content="原型/流程图·竞品拆解·PRD清单｜支持搜索、收藏、最近使用与模板库。" />
+  <meta property="og:type" content="website" />
+  <style>
+    :root{
+      --bg:#f7fafc;
+      --paper:#ffffff;
+      --paper2:#fbfdff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:rgba(15,23,42,.10);
+      --shadow: 0 16px 46px rgba(15,23,42,.10);
+      --shadow2: 0 26px 86px rgba(15,23,42,.14);
+      --radius: 18px;
+      --blue:#2563eb;
+      --teal:#0ea5e9;
+      --mint:#10b981;
+      --amber:#f59e0b;
+      --rose:#f43f5e;
+      --violet:#7c3aed;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      line-height:1.55;
+      background:
+        radial-gradient(940px 560px at 8% 0%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(760px 520px at 92% 8%, rgba(16,185,129,.12), transparent 62%),
+        radial-gradient(760px 520px at 44% 108%, rgba(244,63,94,.10), transparent 62%),
+        linear-gradient(180deg, var(--paper2), var(--bg));
+    }
+    a{color:inherit;text-decoration:none}
+    button{font-family:inherit}
+
+    .shell{max-width:1260px;margin:0 auto;padding:14px}
+    .layout{
+      display:grid;
+      grid-template-columns: 310px minmax(0, 1fr);
+      gap: 14px;
+      align-items:start;
+    }
+    .panel{
+      background: rgba(255,255,255,.86);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .panel.pad{padding:14px}
+    .anchor{scroll-margin-top: 12px}
+
+    .side{
+      position: sticky;
+      top: 14px;
+      height: calc(100vh - 28px);
+      overflow:auto;
+      padding: 12px;
+    }
+    .side::-webkit-scrollbar{width:10px}
+    .side::-webkit-scrollbar-thumb{background: rgba(15,23,42,.10); border-radius: 999px}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 6px 4px 12px;
+    }
+    .logo{
+      width:40px;height:40px;border-radius:16px;
+      background:
+        radial-gradient(14px 14px at 30% 30%, rgba(255,255,255,.60), transparent 62%),
+        linear-gradient(135deg, rgba(37,99,235,1), rgba(16,185,129,.92));
+      box-shadow: 0 18px 44px rgba(37,99,235,.20);
+    }
+    .brand-text{display:flex;flex-direction:column;line-height:1.1}
+    .brand-title{font-weight:980;letter-spacing:.2px}
+    .brand-sub{margin-top:2px;color: var(--muted);font-size:12px}
+
+    .side-actions{display:flex;gap:10px;flex-wrap:wrap;margin: 8px 0 10px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.76);
+      color: rgba(15,23,42,.92);
+      border-radius:999px;
+      padding:10px 12px;
+      font-size:12.5px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(37,99,235,.22); background: rgba(255,255,255,.92)}
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(37,99,235,1), rgba(16,185,129,.95));
+      border-color: rgba(37,99,235,.22);
+      color:#fff;
+      font-weight: 900;
+    }
+    .btn.ghost{background:transparent}
+
+    .side-section-title{
+      margin: 12px 0 8px;
+      font-weight: 950;
+      font-size: 12px;
+      color: rgba(15,23,42,.72);
+      letter-spacing:.2px;
+    }
+
+    .catlist{display:flex;flex-direction:column;gap:8px}
+    .catitem{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.74);
+      border-radius: 16px;
+      padding: 10px 10px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      text-align:left;
+    }
+    .catitem:hover{transform: translateY(-1px); border-color: rgba(16,185,129,.18); background: rgba(255,255,255,.92)}
+    .catitem.active{border-color: rgba(37,99,235,.22); background: rgba(37,99,235,.08)}
+    .catleft{display:flex;align-items:center;gap:10px;min-width:0}
+    .catico{
+      width: 36px;height:36px;border-radius: 14px;
+      display:flex;align-items:center;justify-content:center;
+      background: linear-gradient(135deg, rgba(37,99,235,.12), rgba(16,185,129,.10));
+      color: rgba(15,23,42,.84);
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    .catname{font-weight: 920; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .catmeta{
+      font-size: 12px;
+      color: rgba(15,23,42,.58);
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.70);
+      padding: 5px 8px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .main{min-width:0}
+    .top{
+      display:flex;
+      gap: 12px;
+      align-items:stretch;
+      flex-wrap:wrap;
+    }
+    .spot{
+      flex: 1 1 460px;
+      border-radius: 22px;
+      overflow:hidden;
+      border: 1px solid rgba(15,23,42,.10);
+      background:
+        radial-gradient(860px 420px at 14% 10%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(760px 420px at 86% 22%, rgba(16,185,129,.12), transparent 62%),
+        radial-gradient(620px 380px at 52% 92%, rgba(244,63,94,.10), transparent 62%),
+        linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow: var(--shadow2);
+      padding: 14px 14px;
+    }
+    .spot-title{margin:0;font-size:18px;font-weight:980;letter-spacing:.2px}
+    .spot-sub{margin:8px 0 0;color: rgba(15,23,42,.68);font-size:12.5px;line-height:1.7}
+
+    .searchbar{
+      margin-top: 10px;
+      display:flex;align-items:center;gap:10px;
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(15,23,42,.10);
+      box-shadow: 0 18px 60px rgba(15,23,42,.10);
+    }
+    .searchbar svg{opacity:.92;color: rgba(15,23,42,.72)}
+    .searchbar input{
+      flex:1;border:0;outline:0;background:transparent;
+      color: rgba(15,23,42,.92);
+      font-size: 14px;
+    }
+    .searchbar input::placeholder{color: rgba(100,116,139,.82)}
+
+    .statrow{margin-top: 10px;display:flex;gap:10px;flex-wrap:wrap}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:7px 10px;border-radius:999px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.74);
+      color: rgba(15,23,42,.70);
+      font-size:12px;
+      user-select:none;
+    }
+    .chip b{color: rgba(15,23,42,.92)}
+    .chip i{font-style:normal;color: rgba(244,63,94,.95)}
+
+    .rec{
+      flex: 0 1 360px;
+      min-width: 320px;
+    }
+    .rec-head{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(15,23,42,.10);
+    }
+    .rec-title{font-weight:980}
+    .segrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .seg{
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.74);
+      color: rgba(15,23,42,.80);
+      border-radius:999px;
+      padding:7px 10px;
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .seg.active{border-color: rgba(37,99,235,.22); background: rgba(37,99,235,.10); color: rgba(15,23,42,.92)}
+    .rec-body{padding: 12px 12px}
+    .rec-desc{margin:0;color: rgba(15,23,42,.70);font-size:12.5px}
+    .rec-hint{margin:8px 0 0;color: rgba(15,23,42,.54);font-size:12px}
+    .rec-grid{margin-top: 10px;display:grid;grid-template-columns: 1fr;gap:10px}
+    .rec-card{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 10px;
+      border-radius: 16px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.74);
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      min-height: 62px;
+    }
+    .rec-card:hover{transform: translateY(-1px); border-color: rgba(16,185,129,.18); background: rgba(255,255,255,.92)}
+    .rec-icon{
+      width: 40px;height:40px;border-radius: 16px;
+      display:flex;align-items:center;justify-content:center;
+      background: linear-gradient(135deg, rgba(37,99,235,.12), rgba(16,185,129,.10));
+      color: rgba(15,23,42,.84);
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    .rec-icon img{width: 20px;height: 20px;object-fit:contain;opacity:.96}
+    .rec-text{display:flex;flex-direction:column;min-width:0}
+    .rec-name{font-weight:900;font-size:13px}
+    .rec-sub{color: rgba(15,23,42,.60); font-size:12px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+    .grid{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .card{
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.78);
+      border-radius: 18px;
+      padding: 12px 12px;
+    }
+    .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .card-title{margin:0;font-weight:980;font-size:14.5px}
+    .card-desc{margin:6px 0 0;color: rgba(15,23,42,.62);font-size:12.5px;line-height:1.6}
+    .star{
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.74);
+      color: rgba(15,23,42,.92);
+      border-radius: 14px;
+      width: 38px;height: 38px;
+      display:inline-flex;align-items:center;justify-content:center;
+      cursor:pointer;user-select:none;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      flex: 0 0 auto;
+    }
+    .star:hover{transform: translateY(-1px); border-color: rgba(37,99,235,.20); background: rgba(255,255,255,.92)}
+    .tags{margin-top: 10px;display:flex;gap:8px;flex-wrap:wrap}
+    .tag{
+      font-size:12px;
+      padding:6px 9px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.70);
+      color: rgba(15,23,42,.68);
+    }
+    .card-actions{margin-top: 10px;display:flex;gap:10px;flex-wrap:wrap}
+    .mini{
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.74);
+      color: rgba(15,23,42,.88);
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:12.5px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .mini:hover{transform: translateY(-1px); border-color: rgba(16,185,129,.18); background: rgba(255,255,255,.92)}
+    .mini.primary{
+      background: linear-gradient(135deg, rgba(37,99,235,1), rgba(16,185,129,.95));
+      border-color: rgba(37,99,235,.20);
+      color:#fff;
+      font-weight: 900;
+    }
+
+    .inline-ad{grid-column:1 / -1}
+    .ad-slot{
+      border-radius: 18px;
+      border:1px solid rgba(15,23,42,.10);
+      background:
+        radial-gradient(820px 320px at 10% 10%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(760px 320px at 88% 30%, rgba(16,185,129,.10), transparent 62%),
+        linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,255,255,.74));
+      padding: 14px 14px;
+    }
+    .ad-title{font-weight: 980}
+    .ad-desc{margin-top:8px;color: rgba(15,23,42,.68);font-size:12.5px;line-height:1.7}
+    .badge{
+      font-size:12px;
+      padding:6px 9px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.74);
+      color: rgba(15,23,42,.72);
+      user-select:none;
+    }
+
+    .work{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .wcard{
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.78);
+      border-radius: 18px;
+      padding: 12px 12px;
+    }
+    .wtitle{margin:0;font-size:14.5px;font-weight:980}
+    .wdesc{margin:6px 0 0;color: rgba(15,23,42,.62);font-size:12.5px;line-height:1.7}
+    .wmeta{margin-top: 10px;display:flex;gap:8px;flex-wrap:wrap}
+
+    .tmpl-grid{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .tmpl-card{
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.78);
+      border-radius: 18px;
+      padding: 12px 12px;
+    }
+    .tmpl-title{margin:0;font-size:14.5px;font-weight:980}
+    .tmpl-desc{margin:6px 0 0;color: rgba(15,23,42,.64);font-size:12.5px;line-height:1.7}
+    .tmpl-actions{margin-top: 10px;display:flex;gap:10px;flex-wrap:wrap}
+
+    .footer{
+      margin: 14px 0 0;
+      padding: 14px 0 30px;
+      color: rgba(15,23,42,.56);
+      font-size: 12px;
+      text-align:center;
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      pointer-events:none;
+      background: rgba(15,23,42,.86);
+      border:1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.92);
+      padding: 10px 12px;
+      border-radius: 12px;
+      box-shadow: 0 22px 70px rgba(15,23,42,.22);
+      transition: transform .18s ease, opacity .18s ease;
+      font-size: 12.5px;
+      max-width: min(720px, calc(100vw - 28px));
+      text-align:center;
+      z-index: 80;
+    }
+    .toast.show{opacity: 1; transform: translateX(-50%) translateY(0px)}
+
+    @media (max-width: 1100px){
+      .layout{grid-template-columns: 1fr}
+      .side{position: relative; top:auto; height:auto}
+      .rec{min-width: 0; flex: 1 1 360px}
+      .grid{grid-template-columns: repeat(2, minmax(0, 1fr))}
+      .tmpl-grid{grid-template-columns: repeat(2, minmax(0, 1fr))}
+    }
+    @media (max-width: 560px){
+      .grid{grid-template-columns: 1fr}
+      .tmpl-grid{grid-template-columns: 1fr}
+      .work{grid-template-columns: 1fr}
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="layout">
+      <aside class="panel side" aria-label="侧边栏">
+        <div class="brand">
+          <div class="logo" aria-hidden="true"></div>
+          <div class="brand-text">
+            <div class="brand-title">AI 产品经理工作台</div>
+            <div class="brand-sub">原型/流程图 · 竞品拆解 · PRD 清单</div>
+          </div>
+        </div>
+
+        <div class="side-actions">
+          <button class="btn ghost" id="showFavs3" type="button" data-event="pm3_side_favs">只看收藏</button>
+          <button class="btn primary" id="submitTool3" type="button" data-event="pm3_side_host">部署选型</button>
+        </div>
+
+        <div class="side-section-title">分类</div>
+        <div class="catlist" id="catList3" aria-label="分类列表"></div>
+
+        <div class="side-section-title">快捷</div>
+        <div class="side-actions">
+          <a class="btn" href="#pm3-templates" data-event="pm3_side_templates">模板库</a>
+          <a class="btn" href="#pm3-toolbox" data-event="pm3_side_toolbox">工具库</a>
+          <button class="btn" id="fabTop3" type="button" data-event="pm3_side_top">回到顶部</button>
+        </div>
+        <div style="margin-top:10px;color: rgba(15,23,42,.60);font-size:12.5px;line-height:1.7">
+          收藏与最近打开仅保存在本地；模板建议结合团队规范做裁剪。
+        </div>
+      </aside>
+
+      <section class="main">
+        <div class="top">
+          <section class="spot" aria-label="聚光灯">
+            <h1 class="spot-title">把“表达”做成资产</h1>
+            <p class="spot-sub">PRD 一页对齐、竞品拆解、原型/流程图、评审纪要：把不确定性写成可复用的结构与清单。</p>
+            <div class="searchbar" role="search">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2"/>
+                <path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <input id="q3" type="search" placeholder="搜索：原型 / 流程图 / 竞品 / PRD / 评审 ..." autocomplete="off" />
+            </div>
+            <div class="statrow" aria-label="统计信息">
+              <span class="chip"><b id="count3">0</b> 个结果</span>
+              <span class="chip">当前分类：<b id="activeCat3">全部</b></span>
+              <span class="chip">分类 <b id="catCount3">0</b> / 工具 <b id="toolCount3">0</b></span>
+              <span class="chip">已收藏 <b id="favCount3">0</b> <i>★</i></span>
+            </div>
+
+            <section class="panel pad anchor" id="pm3-work" aria-label="工作台卡片" style="margin-top:12px">
+              <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div style="font-size:16px;font-weight:980">今日工作台</div>
+                  <div style="margin-top:6px;color: rgba(15,23,42,.64);font-size:12.5px">按产出物推进：先对齐再画图，先拆竞品再写PRD。</div>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+                  <a class="mini" href="#" id="openDisclaimer3" data-event="pm3_open_disclaimer">使用说明</a>
+                  <a class="mini" href="#" id="openPrivacy3" data-event="pm3_open_privacy">隐私说明</a>
+                </div>
+              </div>
+              <div class="work" id="workCards3" aria-label="工作台清单"></div>
+            </section>
+          </section>
+
+          <section class="panel rec" aria-label="推荐与最近">
+            <div class="rec-head">
+              <div class="rec-title">常用入口</div>
+              <div class="segrow" role="tablist" aria-label="推荐切换">
+                <button class="seg active" type="button" data-rec="recommend" data-event="pm3_rec_tab_recommend" aria-selected="true">常用</button>
+                <button class="seg" type="button" data-rec="recent" data-event="pm3_rec_tab_recent" aria-selected="false">最近</button>
+              </div>
+            </div>
+            <div class="rec-body">
+              <p class="rec-desc" id="recommendDesc3"></p>
+              <p class="rec-hint" id="recommendHint3"></p>
+              <div class="rec-grid" id="recommendGrid3" aria-label="推荐列表"></div>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel pad anchor" id="pm3-toolbox" aria-label="工具库" style="margin-top:12px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div>
+              <h2 style="margin:0;font-size:16px;font-weight:980">工具库（按“写清楚→画清楚→推进”）</h2>
+              <p style="margin:6px 0 0;color: rgba(15,23,42,.64);font-size:12.5px">侧边栏选分类；搜索支持关键词与交付物。</p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+              <a class="mini primary" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="pm3_cta_1bgp_primary">查看方案</a>
+              <a class="mini" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="pm3_cta_1bgp_secondary">进入官网</a>
+            </div>
+          </div>
+          <div class="grid" id="grid3" aria-label="工具列表"></div>
+        </section>
+
+        <section class="panel pad anchor" id="pm3-templates" aria-label="模板库" style="margin-top:12px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div>
+              <h2 style="margin:0;font-size:16px;font-weight:980">模板库（需求/PRD/竞品/原型/流程）</h2>
+              <p style="margin:6px 0 0;color: rgba(15,23,42,.64);font-size:12.5px">把信息补齐：背景、目标、范围、指标、风险与验收，输出更稳定。</p>
+            </div>
+          </div>
+          <div class="tmpl-grid" id="tmplGrid3" aria-label="模板卡片"></div>
+        </section>
+
+        <section class="panel pad anchor" id="pm3-checklist" aria-label="清单库" style="margin-top:12px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div>
+              <h2 style="margin:0;font-size:16px;font-weight:980">清单库（评审与交付）</h2>
+              <p style="margin:6px 0 0;color: rgba(15,23,42,.64);font-size:12.5px">用于评审、交付一致性与变更控制。</p>
+            </div>
+          </div>
+          <div class="tmpl-grid" id="sopGrid3" aria-label="清单卡片"></div>
+        </section>
+
+        <footer class="footer">
+          <div>© <span id="year3"></span> AI 产品经理工作台 · 纯前端单页</div>
+        </footer>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast3" role="status" aria-live="polite"></div>
+
+  <script>
+    const LS_KEY = "aipm3:favs";
+    const REC_KEY = "aipm3:recent";
+
+    const tools = [
+      { name: "飞书文档", desc: "需求文档/PRD 协作与评审记录。", url: "https://www.feishu.cn/product/docs", cat: "需求与PRD", tags: ["协作","评审","文档"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.feishu.cn&v=13" },
+      { name: "Notion", desc: "产品知识库、需求池与模板库管理。", url: "https://www.notion.so", cat: "需求与PRD", tags: ["知识库","模板","需求池"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.notion.so&v=13" },
+      { name: "Confluence", desc: "PRD/规范沉淀（企业常用）。", url: "https://www.atlassian.com/software/confluence", cat: "需求与PRD", tags: ["规范","沉淀","知识库"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.atlassian.com%2Fsoftware%2Fconfluence&v=13" },
+
+      { name: "ProcessOn", desc: "流程图/思维导图/原型协作。", url: "https://www.processon.com", cat: "原型与流程", tags: ["流程图","思维导图","协作"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.processon.com&v=13" },
+      { name: "Axure RP", desc: "高保真原型与交互说明。", url: "https://www.axure.com", cat: "原型与流程", tags: ["原型","交互","高保真"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.axure.com&v=13" },
+      { name: "Figma", desc: "设计协作与原型。", url: "https://www.figma.com", cat: "原型与流程", tags: ["协作","原型","组件"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.figma.com&v=13" },
+      { name: "Miro", desc: "白板协作：用户旅程、竞品对比与共创。", url: "https://miro.com", cat: "原型与流程", tags: ["白板","共创","旅程"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fmiro.com&v=13" },
+      { name: "draw.io", desc: "免费流程图与架构图。", url: "https://www.diagrams.net", cat: "原型与流程", tags: ["流程图","架构图","免费"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.diagrams.net&v=13" },
+
+      { name: "Similarweb", desc: "竞品网站与宏观流量参考。", url: "https://www.similarweb.com", cat: "竞品分析", tags: ["竞品","流量","参考"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.similarweb.com&v=13" },
+      { name: "App Annie data.ai", desc: "应用市场与竞品数据洞察（第三方）。", url: "https://www.data.ai", cat: "竞品分析", tags: ["应用","竞品","数据"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.data.ai&v=13" },
+
+      { name: "Jira", desc: "需求拆解与迭代跟踪。", url: "https://www.atlassian.com/software/jira", cat: "评审与推进", tags: ["迭代","任务","缺陷"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.atlassian.com%2Fsoftware%2Fjira&v=13" },
+      { name: "TAPD", desc: "敏捷协作与需求管理。", url: "https://www.tapd.cn", cat: "评审与推进", tags: ["研发","需求","迭代"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.tapd.cn&v=13" },
+      { name: "PingCode", desc: "需求/缺陷/迭代全流程协作。", url: "https://pingcode.com", cat: "评审与推进", tags: ["需求","迭代","协作"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fpingcode.com&v=13" },
+      { name: "Apifox", desc: "接口文档与联调管理（产品/研发协作）。", url: "https://www.apifox.cn", cat: "评审与推进", tags: ["接口","联调","文档"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.apifox.cn&v=13" },
+
+      { name: "ChatGPT", desc: "PRD结构化、竞品拆解、原型说明生成。", url: "https://chat.openai.com", cat: "AI助手", tags: ["PRD","竞品","结构"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fchat.openai.com&v=13" },
+      { name: "DeepSeek", desc: "推理与结构化：边界、风险、验收与取舍。", url: "https://chat.deepseek.com", cat: "AI助手", tags: ["推理","验收","取舍"], icon: "https://www.aig123.com/wp-content/uploads/2024/05/deepseek.png" },
+      { name: "Kimi", desc: "长文阅读：竞品资料、访谈纪要归纳。", url: "https://kimi.moonshot.cn", cat: "AI助手", tags: ["长文","总结","资料"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fkimi.moonshot.cn&v=13" }
+    ];
+
+    const workCards = [
+      { title: "一页对齐：先收敛再推进", desc: "背景/目标/范围/指标/风险：不清楚先补齐，再进入 PRD 与原型。", tags: ["需求","对齐","范围"] },
+      { title: "竞品拆解：结论可行动", desc: "对比定位、链路与体验，输出学/避/差异化动作各 3 条。", tags: ["竞品","对比","结论"] },
+      { title: "原型+流程：状态与异常写清", desc: "页面清单、字段口径、空态/异常/权限与校验规则，减少歧义。", tags: ["原型","流程","异常"] },
+      { title: "评审收敛：结论+待办", desc: "评审清单过一遍，结论明确、行动项有 owner 与 DDL。", tags: ["评审","纪要","推进"] }
+    ];
+
+    const templateCards = [
+      {
+        title: "需求文档（1页对齐版）",
+        tags: ["需求","对齐","范围"],
+        desc: "先对齐：为什么做、做什么、不做什么。",
+        text: `你是资深产品经理。请把需求整理成“一页对齐文档”，输出：\n1) 背景与问题\n2) 目标（含指标口径）\n3) 人群与场景\n4) 范围（做/不做/以后做）\n5) 关键流程（3-5步）\n6) 风险与假设（>=5条）\n7) 验收标准（可验证）\n需求原始信息：<<<粘贴>>>`
+      },
+      {
+        title: "PRD模板（可交付）",
+        tags: ["PRD","结构","验收"],
+        desc: "让评审更快收敛：备选方案与取舍要写清。",
+        text: `请为需求“<<<需求标题>>>”生成 PRD（可交付），包含：\n- 背景/目标/范围\n- 用户故事与场景\n- 方案说明（含备选方案与取舍）\n- 功能清单（优先级）\n- 原型说明（文字版）\n- 风险与依赖\n- 验收标准（逐条可验证）\n输入：<<<补充业务/人群/约束>>>`
+      },
+      {
+        title: "竞品分析（对比表+四象限）",
+        tags: ["竞品","对比","差异化"],
+        desc: "从定位到体验：输出可落地结论。",
+        text: `请为产品“<<<我的产品>>>”做竞品分析（>=3个竞品），输出：\n1) 竞品画像（定位/人群/商业模式）\n2) 功能对比表（>=12项）\n3) 关键链路对比\n4) 体验差异与亮点\n5) 四象限\n6) 结论：学/避/差异化（各3条）\n资料：<<<链接/要点>>>`
+      },
+      {
+        title: "原型说明（页面清单+交互规则）",
+        tags: ["原型","交互","规则"],
+        desc: "页面、组件、状态、异常与权限写清。",
+        text: `请把需求转为“原型说明文档”，输出：\n- 页面清单（入口/权限）\n- 每页模块与字段\n- 关键交互规则（校验、状态、空态、异常）\n- 组件复用建议\n需求信息：<<<粘贴>>>`
+      },
+      {
+        title: "流程图/泳道（文字版可画）",
+        tags: ["流程图","泳道","状态机"],
+        desc: "用编号步骤描述，便于直接画图。",
+        text: `请把业务流程输出为：\n1) 泳道流程（用户/系统/运营/客服）\n2) 状态机（状态与迁移条件）\n3) 异常分支（>=6条）\n流程描述：<<<粘贴>>>`
+      }
+    ];
+
+    const checklistCards = [
+      {
+        title: "PRD评审清单（必过项）",
+        tags: ["评审","清单","收敛"],
+        desc: "目标、范围、验收、风险、依赖五项必过。",
+        text: `评审清单：\n1) 目标与指标口径是否清晰\n2) 范围是否明确\n3) 关键流程是否闭环\n4) 备选方案与取舍是否充分\n5) 依赖是否拉齐\n6) 风险与回滚是否考虑\n7) 验收标准是否可验证\n输出：需补充项列表 + owner。`
+      },
+      {
+        title: "交付一致性清单（PRD↔原型）",
+        tags: ["一致性","交付","减少返工"],
+        desc: "避免 PRD 与原型/流程不一致。",
+        text: `一致性检查：\n1) 范围是否一致（做/不做）\n2) 字段口径是否一致\n3) 状态与异常是否覆盖\n4) 权限与边界是否一致\n5) 验收标准是否能映射到原型/流程\n输出：不一致项列表 + 修复建议。`
+      },
+      {
+        title: "需求变更清单（控制范围）",
+        tags: ["变更","范围","控制"],
+        desc: "变更要可追踪：影响评估与结论。",
+        text: `需求变更清单：\n1) 变更内容与原因\n2) 影响范围（功能/接口/测试/排期）\n3) 风险与回滚\n4) 是否需要重新评审\n输出：变更结论 + 行动项。`
+      }
+    ];
+
+    const state = { activeCat: "全部", q: "", favOnly: false, favs: new Set() };
+    const els = {
+      q: document.getElementById("q3"),
+      recommendGrid: document.getElementById("recommendGrid3"),
+      recommendDesc: document.getElementById("recommendDesc3"),
+      recommendHint: document.getElementById("recommendHint3"),
+      catList: document.getElementById("catList3"),
+      grid: document.getElementById("grid3"),
+      tmplGrid: document.getElementById("tmplGrid3"),
+      sopGrid: document.getElementById("sopGrid3"),
+      workCards: document.getElementById("workCards3"),
+      activeCat: document.getElementById("activeCat3"),
+      count: document.getElementById("count3"),
+      catCount: document.getElementById("catCount3"),
+      toolCount: document.getElementById("toolCount3"),
+      favCount: document.getElementById("favCount3"),
+      showFavs: document.getElementById("showFavs3"),
+      year: document.getElementById("year3"),
+      toast: document.getElementById("toast3"),
+      fabTop: document.getElementById("fabTop3"),
+      submitTool: document.getElementById("submitTool3"),
+      openDisclaimer: document.getElementById("openDisclaimer3"),
+      openPrivacy: document.getElementById("openPrivacy3")
+    };
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+    function normalize(s){return (s || "").toLowerCase().trim();}
+    function toast(msg){
+      els.toast.textContent = msg;
+      els.toast.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => els.toast.classList.remove("show"), 1700);
+    }
+    function track(node){
+      const ev = node?.dataset?.event;
+      if(!ev) return;
+      window.__events = window.__events || [];
+      window.__events.push({ event: ev, ts: Date.now() });
+    }
+    function getCategories(items){
+      const set = new Set(items.map(x => x.cat));
+      return ["全部", ...Array.from(set).sort((a,b)=>a.localeCompare(b,"zh-Hans-CN"))];
+    }
+    function countByCat(items){
+      const map = new Map();
+      for(const it of items){
+        map.set(it.cat, (map.get(it.cat) || 0) + 1);
+      }
+      return map;
+    }
+    function matchesQuery(item, q){
+      if(!q) return true;
+      const hay = [item.name, item.desc, item.cat, ...(item.tags || [])].join(" ").toLowerCase();
+      return hay.includes(q);
+    }
+    function shouldShow(item){
+      if(state.activeCat !== "全部" && item.cat !== state.activeCat) return false;
+      if(state.favOnly && !state.favs.has(item.name)) return false;
+      if(!matchesQuery(item, state.q)) return false;
+      return true;
+    }
+
+    function saveFavs(){
+      localStorage.setItem(LS_KEY, JSON.stringify(Array.from(state.favs)));
+      updateCounts();
+    }
+    function loadFavs(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        if(!raw) return;
+        const arr = JSON.parse(raw);
+        if(Array.isArray(arr)) state.favs = new Set(arr);
+      }catch(_){}
+    }
+    function loadRecents(){
+      try{
+        const raw = localStorage.getItem(REC_KEY);
+        if(!raw) return [];
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr.filter(Boolean) : [];
+      }catch(_){return [];}
+    }
+    function saveRecents(list){
+      try{localStorage.setItem(REC_KEY, JSON.stringify(list.slice(0, 12)))}catch(_){}
+    }
+    function pushRecent(name){
+      if(!name) return;
+      const list = loadRecents();
+      const next = [name, ...list.filter(x => x !== name)].slice(0, 12);
+      saveRecents(next);
+    }
+
+    function iconSvg(cat){
+      const common = {
+        "需求与PRD": `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4h10a2 2 0 0 1 2 2v14H7a2 2 0 0 0-2 2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/><path d="M9 8h8M9 12h8M9 16h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+        "原型与流程": `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Z" stroke="currentColor" stroke-width="2"/><path d="M8 9h8M8 12h5M8 15h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+        "竞品分析": `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 20V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 20V4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 20v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20 20v-9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+        "评审与推进": `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 7a4 4 0 0 1 8 0v2h2a3 3 0 0 1 3 3v8H4v-8a3 3 0 0 1 3-3h2V7Z" stroke="currentColor" stroke-width="2"/></svg>`,
+        "AI助手": `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l1.6 4.6L18 8l-4.4 1.4L12 14l-1.6-4.6L6 8l4.4-1.4L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M5 14l.9 2.6L8.5 17l-2.6.9L5 20l-.9-2.1L1.5 17l2.6-.4L5 14Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`
+      };
+      return common[cat] || `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="2"/><path d="M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+    }
+
+    function toolIconSvg(name){
+      const map = {
+        "飞书文档": iconSvg("需求与PRD"),
+        "Notion": iconSvg("需求与PRD"),
+        "Confluence": iconSvg("需求与PRD"),
+        "ProcessOn": iconSvg("原型与流程"),
+        "Axure RP": iconSvg("原型与流程"),
+        "Figma": iconSvg("原型与流程"),
+        "Miro": iconSvg("原型与流程"),
+        "draw.io": iconSvg("原型与流程"),
+        "Similarweb": iconSvg("竞品分析"),
+        "App Annie data.ai": iconSvg("竞品分析"),
+        "Jira": iconSvg("评审与推进"),
+        "TAPD": iconSvg("评审与推进"),
+        "PingCode": iconSvg("评审与推进"),
+        "Apifox": iconSvg("评审与推进"),
+        "ChatGPT": iconSvg("AI助手"),
+        "DeepSeek": iconSvg("AI助手"),
+        "Kimi": iconSvg("AI助手")
+      };
+      return map[name] || iconSvg("需求与PRD");
+    }
+
+    function toolIconHtml(tool){
+      if(tool?.icon){
+        return `<img src="${escapeHtml(tool.icon)}" alt="${escapeHtml(tool.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-icon-name="${escapeHtml(tool.name)}" />`;
+      }
+      return toolIconSvg(tool?.name || "");
+    }
+
+    function attachIconFallback(root){
+      if(!root) return;
+      root.querySelectorAll('img[data-icon-name]').forEach(img => {
+        img.addEventListener("error", () => {
+          const name = img.getAttribute("data-icon-name") || "";
+          const wrap = img.parentElement;
+          if(!wrap) return;
+          wrap.innerHTML = toolIconSvg(name);
+        }, { once: true });
+      });
+    }
+
+    function updateCounts(filtered){
+      const categories = getCategories(tools);
+      els.catCount.textContent = String(Math.max(0, categories.length - 1));
+      els.toolCount.textContent = String(tools.length);
+      els.favCount.textContent = String(state.favs.size);
+      if(typeof filtered === "number") els.count.textContent = String(filtered);
+      els.activeCat.textContent = state.activeCat;
+    }
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        toast("已复制");
+      }catch(_){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        toast("已复制");
+      }
+    }
+
+    function renderCards(list, root, evPrefix){
+      if(!root) return;
+      root.innerHTML = list.map((x) => `
+        <article class="tmpl-card">
+          <h3 class="tmpl-title">${escapeHtml(x.title)}</h3>
+          <p class="tmpl-desc">${escapeHtml(x.desc)}</p>
+          <div class="tags">
+            ${(x.tags || []).slice(0,4).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}
+          </div>
+          <div class="tmpl-actions">
+            <button class="mini primary" type="button" data-copy="${escapeHtml(x.text)}" data-event="${evPrefix}_copy">复制模板</button>
+            <button class="mini" type="button" data-fill="${escapeHtml(x.title)}" data-event="${evPrefix}_use">用于搜索</button>
+          </div>
+        </article>
+      `).join("");
+      root.querySelectorAll("[data-copy]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          track(e.currentTarget);
+          const text = e.currentTarget.getAttribute("data-copy") || "";
+          copyText(text);
+        });
+      });
+      root.querySelectorAll("[data-fill]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          track(e.currentTarget);
+          const q = e.currentTarget.getAttribute("data-fill") || "";
+          els.q.value = q;
+          state.q = normalize(q);
+          renderGrid();
+          toast("已填入搜索框");
+        });
+      });
+    }
+
+    function renderWorkCards(){
+      if(!els.workCards) return;
+      els.workCards.innerHTML = workCards.map(x => `
+        <article class="wcard">
+          <h3 class="wtitle">${escapeHtml(x.title)}</h3>
+          <p class="wdesc">${escapeHtml(x.desc)}</p>
+          <div class="wmeta">
+            ${(x.tags || []).slice(0,4).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderCatList(){
+      const categories = getCategories(tools);
+      const catCounts = countByCat(tools);
+      els.catList.innerHTML = categories.map(cat => {
+        const active = cat === state.activeCat ? "active" : "";
+        const count = cat === "全部" ? tools.length : (catCounts.get(cat) || 0);
+        return `
+          <button class="catitem ${active}" type="button" data-cat="${escapeHtml(cat)}" data-event="pm3_cat_${escapeHtml(cat)}" aria-label="${escapeHtml(cat)}">
+            <span class="catleft">
+              <span class="catico">${iconSvg(cat)}</span>
+              <span class="catname">${escapeHtml(cat)}</span>
+            </span>
+            <span class="catmeta">${count}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderRecommend(mode){
+      const prefer = ["飞书文档","ProcessOn","Jira","ChatGPT","DeepSeek"];
+      let list = [];
+      if(mode === "recent"){
+        const recentNames = loadRecents();
+        list = recentNames.map(n => tools.find(t => t.name === n)).filter(Boolean);
+        els.recommendDesc.textContent = "你最近点过的入口（仅保存在本地，不上传）。";
+        els.recommendHint.textContent = list.length ? "" : "暂无最近记录。点击工具后会自动出现。";
+      }else{
+        const picked = [];
+        for(const n of prefer){
+          const t = tools.find(x => x.name === n);
+          if(t) picked.push(t);
+        }
+        for(const t of tools){
+          if(!picked.some(x => x.name === t.name)) picked.push(t);
+        }
+        list = picked.slice(0, 8);
+        els.recommendDesc.textContent = "常用入口（置顶）。";
+        els.recommendHint.textContent = "";
+      }
+      els.recommendGrid.innerHTML = list.map(t => `
+        <a class="rec-card" href="${escapeHtml(t.url)}" target="_blank" rel="noopener noreferrer" data-event="pm3_rec_open_${escapeHtml(t.name)}" data-tool="${escapeHtml(t.name)}" aria-label="${escapeHtml(t.name)}">
+          <span class="rec-icon">${toolIconHtml(t)}</span>
+          <span class="rec-text">
+            <span class="rec-name">${escapeHtml(t.name)}</span>
+            <span class="rec-sub">${escapeHtml(t.desc || "")}</span>
+          </span>
+        </a>
+      `).join("");
+      attachIconFallback(els.recommendGrid);
+      els.recommendGrid.querySelectorAll("a").forEach(a => {
+        a.addEventListener("click", (e) => {
+          track(e.currentTarget);
+          const name = e.currentTarget.getAttribute("data-tool") || "";
+          pushRecent(name);
+        });
+      });
+    }
+
+    function renderInlineAd(){
+      return `
+        <div class="inline-ad">
+          <div class="ad-slot" role="region" aria-label="信息流推荐">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <div class="ad-title">信息流推荐：1bgp.com 服务器</div>
+              <span class="badge">合作</span>
+            </div>
+            <div class="ad-desc">适合部署需求池、PRD 模板库、原型文件与评审记录。云/物理机可选，按需扩容。</div>
+            <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+              <a class="mini primary" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="pm3_ad_feed_primary">查看配置</a>
+              <a class="mini" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="pm3_ad_feed_secondary">进入官网</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGrid(){
+      const list = tools.filter(shouldShow);
+      updateCounts(list.length);
+      renderCatList();
+
+      if(list.length === 0){
+        els.grid.innerHTML = `
+          <div class="card" style="grid-column:1 / -1">
+            <div class="card-title">没有匹配结果</div>
+            <p class="card-desc">尝试切换分类或减少关键词，或取消“只看收藏”。</p>
+            <div class="card-actions">
+              <button class="mini primary" type="button" id="resetFilters3" data-event="pm3_reset_filters">重置筛选</button>
+              <a class="mini" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="pm3_cta_from_empty">看看部署方案</a>
+            </div>
+          </div>
+        `;
+        document.getElementById("resetFilters3").addEventListener("click", (e) => {
+          track(e.currentTarget);
+          state.activeCat = "全部";
+          state.q = "";
+          state.favOnly = false;
+          els.q.value = "";
+          els.showFavs.textContent = "只看收藏";
+          renderGrid();
+          toast("已重置筛选");
+        });
+        return;
+      }
+
+      const nodes = [];
+      const insertAt = Math.min(9, list.length);
+      list.forEach((item, idx) => {
+        if(idx === insertAt) nodes.push(renderInlineAd());
+        const fav = state.favs.has(item.name);
+        nodes.push(`
+          <article class="card" data-name="${escapeHtml(item.name)}" data-cat="${escapeHtml(item.cat)}">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">${escapeHtml(item.name)}</h3>
+                <p class="card-desc">${escapeHtml(item.desc)}</p>
+              </div>
+              <button class="star" type="button" aria-label="收藏" aria-pressed="${fav ? "true" : "false"}" data-fav="${escapeHtml(item.name)}" data-event="pm3_fav_toggle">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 17.3 6.2 20.6l1.1-6.6L2.6 9.7l6.6-1 2.8-6 2.8 6 6.6 1-4.7 4.3 1.1 6.6L12 17.3Z" stroke="currentColor" stroke-width="2" opacity="${fav ? "1" : ".7"}" fill="${fav ? "rgba(37,99,235,.14)" : "transparent"}"/>
+                </svg>
+              </button>
+            </div>
+            <div class="tags">
+              <span class="tag">${escapeHtml(item.cat)}</span>
+              ${(item.tags || []).slice(0,3).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}
+            </div>
+            <div class="card-actions">
+              <a class="mini primary" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" data-event="pm3_tool_open" data-tool="${escapeHtml(item.name)}">访问</a>
+              <button class="mini" type="button" data-event="pm3_tool_copy" data-copy="${escapeHtml(item.name)}｜${escapeHtml(item.url)}">复制链接</button>
+            </div>
+          </article>
+        `);
+      });
+      els.grid.innerHTML = nodes.join("");
+
+      els.grid.querySelectorAll("[data-fav]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          track(e.currentTarget);
+          const name = e.currentTarget.getAttribute("data-fav");
+          if(!name) return;
+          if(state.favs.has(name)) state.favs.delete(name);
+          else state.favs.add(name);
+          saveFavs();
+          renderGrid();
+          toast(state.favs.has(name) ? "已收藏" : "已取消收藏");
+        });
+      });
+
+      els.grid.querySelectorAll("[data-copy]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          track(e.currentTarget);
+          const text = e.currentTarget.getAttribute("data-copy") || "";
+          copyText(text);
+        });
+      });
+
+      els.grid.querySelectorAll('a[data-event="pm3_tool_open"]').forEach(a => {
+        a.addEventListener("click", (e) => {
+          track(e.currentTarget);
+          const name = e.currentTarget.getAttribute("data-tool") || "";
+          pushRecent(name);
+        });
+      });
+
+      els.grid.querySelectorAll('[data-event^="pm3_ad_"]').forEach(a => {
+        a.addEventListener("click", (e) => track(e.currentTarget));
+      });
+    }
+
+    function setActiveCat(cat){
+      state.activeCat = cat;
+      renderGrid();
+    }
+
+    function init(){
+      loadFavs();
+      els.year.textContent = String(new Date().getFullYear());
+      renderWorkCards();
+      renderRecommend("recommend");
+      renderCards(templateCards, els.tmplGrid, "pm3_tmpl");
+      renderCards(checklistCards, els.sopGrid, "pm3_chk");
+      renderGrid();
+      updateCounts(tools.length);
+
+      const recTabs = document.querySelectorAll("[data-rec]");
+      recTabs.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          track(e.currentTarget);
+          const mode = e.currentTarget.getAttribute("data-rec") || "recommend";
+          recTabs.forEach(x => {
+            const active = x === e.currentTarget;
+            x.classList.toggle("active", active);
+            x.setAttribute("aria-selected", active ? "true" : "false");
+          });
+          renderRecommend(mode);
+        });
+      });
+
+      els.q.addEventListener("input", () => {
+        state.q = normalize(els.q.value);
+        renderGrid();
+      });
+
+      els.catList.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-cat]");
+        if(!btn) return;
+        track(btn);
+        const cat = btn.getAttribute("data-cat");
+        if(!cat) return;
+        setActiveCat(cat);
+      });
+
+      els.showFavs.addEventListener("click", (e) => {
+        track(e.currentTarget);
+        state.favOnly = !state.favOnly;
+        els.showFavs.textContent = state.favOnly ? "显示全部" : "只看收藏";
+        renderGrid();
+        toast(state.favOnly ? "仅显示收藏" : "显示全部");
+      });
+
+      els.fabTop.addEventListener("click", (e) => {
+        track(e.currentTarget);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      els.submitTool.addEventListener("click", (e) => {
+        track(e.currentTarget);
+        window.open("https://www.1bgp.com/", "_blank", "noopener,noreferrer");
+      });
+
+      els.openDisclaimer.addEventListener("click", (e) => {
+        e.preventDefault();
+        track(e.currentTarget);
+        toast("使用说明：工作台用于整理产品经理交付物与模板，仅作参考；请结合团队规范、评审机制与研发流程裁剪落地。");
+      });
+
+      els.openPrivacy.addEventListener("click", (e) => {
+        e.preventDefault();
+        track(e.currentTarget);
+        toast("隐私说明：收藏/最近使用仅保存在你的浏览器本地，不会上传。");
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
